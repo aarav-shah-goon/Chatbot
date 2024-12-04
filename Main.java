@@ -1,14 +1,8 @@
 import java.util.Scanner;
 
-
-
-
 public class Main {
 
-
-
-
-    // Arrays of predefined chatbot responses for misunderstandings, greetings, and goodbyes.
+    // when user doesnt understand
     private static final String[] misunderstandings = {
         "I'm sorry, I didn't catch that.",
         "Could you say that again?",
@@ -16,11 +10,15 @@ public class Main {
         "Can you try asking in a different way?",
         "Hmm, that's beyond my expertise."
     };
+
+    // greetings when the bot starts talking
     private static final String[] greetings = {
         "Hello! Welcome to Chipotle! How can I help you today?",
         "Hi there, welcome in! What would you like to order?",
         "Hey there! Ready to place your order?"
     };
+
+    // these are the goodbyes when the user ends the convo
     private static final String[] goodbye = {
         "Thank you for coming! Have a great day!",
         "Thanks for stopping by! Hope to see you again soon!",
@@ -30,18 +28,14 @@ public class Main {
         "Thanks a lot! Enjoy your food, and we will see you next time!"
     };
 
-
-
-
-    // Scanner for user input and variables to track the total price and order summary.
+    // scanner to get input from user
     private static final Scanner scanner = new Scanner(System.in);
-    private static double totalPrice = 0.0; // Tracks the total price of the order.
-    private static String orderSummary = ""; // Stores a summary of all selected items.
+    // total cost of the meal
+    private static double totalPrice = 0.0;
+    // keeps track of all the stuff they ordered
+    private static String orderSummary = "";
 
-
-
-
-    // Array of menu items with name, price, and category (e.g., Dish, Protein, etc.).
+    // the menu items (everything they can choose)
     private static final MenuItem[] menuItems = {
         new MenuItem("Taco", 7.99, "Dish"),
         new MenuItem("Burrito", 8.69, "Dish"),
@@ -69,121 +63,181 @@ public class Main {
         new MenuItem("Fountain Drink", 2.15, "Drink")
     };
 
-
-
-
     public static void main(String[] args) {
-        // Display a random greeting message to the user.
+        // say hi and start the convo
         System.out.println(getRandomResponse(greetings));
-       
-        // Infinite loop to keep the chatbot running until the user chooses to exit.
+        
+        // loop to keep talking unless they say "exit"
         while (true) {
-            System.out.println("We have Burritos, Tacos, and Burrito Bowls. Which would you prefer?");
+            // color coded menu 
+            String tacos = getColoredText("Tacos", "\u001B[31m"); // Red
+            String burritos = getColoredText("Burritos", "\u001B[34m"); // Blue
+            String burritoBowls = getColoredText("Burrito Bowls", "\u001B[32m"); // Green
+
+            System.out.println("We have " + burritos + ", " + tacos + ", and " + burritoBowls + ". What would you want to have?");
             String mainDish = scanner.nextLine().toLowerCase();
 
-
-
-
-            // Check if the user wants to exit.
+            // exit keyword check
             if (mainDish.contains("exit")) {
                 System.out.println("Thank you for visiting Chipotle Chatbot. Have a great day!");
                 break;
             }
 
-
-
-
-            // Process the main dish choice or handle misunderstandings.
-            if (!processMainDish(mainDish)) {
+            if (!isValidDish(mainDish)) {//checks if the dish exists
                 System.out.println(getRandomResponse(misunderstandings));
             } else {
-                // Ask the user if they want another dish or to check out.
-                System.out.println("Would you like another dish or do you want to check out?");
-                String choice = scanner.nextLine().toLowerCase();
+                System.out.println("You picked " + capitalizeFirstLetter(mainDish) + ". Let's customize it!");
+                processMainDish(mainDish);
+                System.out.println("Wanna get another dish or check out?");
+                String choice = scanner.nextLine().toLowerCase();//makes a new scanner to see if they said they want a new dish
+
+                // exit check again
+                if (choice.contains("exit")) {
+                    System.out.println("Thank you for visiting Chipotle Chatbot. Have a great day!");
+                    break;
+                }
+
                 if (choice.contains("check out")) {
-                    checkout(); // Proceed to checkout if the user is done ordering.
+                    checkout();
+                    break;
+                }
+                if (choice.contains("checkout")) {
+                    checkout();
                     break;
                 }
             }
         }
-        // Display a random goodbye message.
+        // say bye when done
         System.out.println(getRandomResponse(goodbye));
     }
 
-
-
-
-    // Processes the user's choice of main dish and adds it to the order.
-    private static boolean processMainDish(String mainDish) {
-        for (MenuItem menuItem : menuItems) {
-            if (menuItem.getType().equals("Dish") && mainDish.contains(menuItem.getName().toLowerCase())) {
-                orderSummary += menuItem.getName() + ", "; // Add the dish to the order summary.
-                totalPrice += menuItem.getPrice(); // Add the dish price to the total.
-                processDishOptions(menuItem.getName()); // Ask for additional options like rice, protein, etc.
+    private static boolean isValidDish(String mainDish) {
+        String[] validDishes = {"taco", "burrito", "burrito bowl"};
+        //checks witha for loop that the dish the user inputed exists
+        for (int i = 0; i < validDishes.length; i++) {
+            if (mainDish.contains(validDishes[i])) {
                 return true;
             }
         }
-        return false; // Return false if the main dish wasn't understood.
+        return false;
     }
 
-
-
-
-    // Asks the user for additional options like rice, protein, beans, and toppings.
-    private static void processDishOptions(String mainDish) {
-        System.out.println("Would you like white rice, brown rice, or no rice?");
-        String rice = scanner.nextLine().toLowerCase();
-        addItemsToOrder(rice);
-
-
-
-
-        System.out.println("What protein would you like? Options: Smoked Brisket, Chicken, Steak, Beef Barbacoa, Carnitas, Sofritas, or none?");
-        String protein = scanner.nextLine().toLowerCase();
-        addItemsToOrder(protein);
-
-
-
-
-        System.out.println("Would you like black beans, pinto beans, or no beans?");
-        String beans = scanner.nextLine().toLowerCase();
-        addItemsToOrder(beans);
-
-
-
-
-        System.out.println("Do you want Guacamole, Mild salsa, Medium salsa, Hot salsa, Corn, Sour Cream, Fajitas, Cheese, Lettuce, or Queso?");
-        String toppings = scanner.nextLine().toLowerCase();
-        addItemsToOrder(toppings);
-    }
-
-
-
-
-    // Adds selected items (rice, protein, beans, or toppings) to the order and updates the total price.
-    private static void addItemsToOrder(String input) {
+    private static void processMainDish(String mainDish) {
+        // loop through menu and check if dish is in the input
         for (MenuItem menuItem : menuItems) {
-            if (input.contains(menuItem.getName().toLowerCase())) {
-                orderSummary += menuItem.getName() + ", "; // Add the item to the order summary.
-                totalPrice += menuItem.getPrice(); // Add the item's price to the total.
+            if (menuItem.getType().equals("Dish") && mainDish.contains(menuItem.getName().toLowerCase())) {
+                orderSummary += menuItem.getName() + ", ";
+                totalPrice += menuItem.getPrice();
+                processDishOptions(menuItem.getName());
+                return;
             }
         }
     }
 
+    private static void processDishOptions(String mainDish) {
+        // pick which rice they want or none
+        while (true) {
+            System.out.println("Want white rice, brown rice, or no rice?");
+            String rice = scanner.nextLine().toLowerCase();
+
+            // exit check
+            if (rice.contains("exit")) {
+                System.out.println("Thank you for visiting Chipotle Chatbot. Have a great day!");
+                System.exit(0);//terminates the JVM so entire code stops, not just loop like break does
+            }
+
+            if (addItemsToOrder(rice) || rice.equals("no") || rice.equals("none") || rice.equals("no rice")) {
+                if (rice.equals("no") || rice.equals("none")||rice.equals("no rice")) {
+                    orderSummary += "No Rice, ";
+                }
+                break;
+            }
+            System.out.println(getRandomResponse(misunderstandings));
+        }
+
+        // pick what protein or none
+        while (true) {
+            System.out.println("What protein? Options: Smoked Brisket, Chicken, Steak, Beef Barbacoa, Carnitas, Sofritas, or none?");
+            String protein = scanner.nextLine().toLowerCase();
+
+            // exit check
+            if (protein.contains("exit")) {
+                System.out.println("Thank you for visiting Chipotle Chatbot. Have a great day!");
+                System.exit(0);//terminates the JVM so entire code stops, not just loop like break does
+            }
+
+            if (addItemsToOrder(protein) || protein.equals("no") || protein.equals("none")||protein.equals("no protein")||protein.equals("no meat")) {
+                if (protein.equals("no") || protein.equals("none")||protein.equals("no protein")||protein.equals("no meat")) {
+                    orderSummary += "No Protein, ";
+                }
+                break;
+            }
+            System.out.println(getRandomResponse(misunderstandings));
+        }
+
+        // pick which beans or none
+        while (true) {
+            System.out.println("Want black beans, pinto beans, or no beans?");
+            String beans = scanner.nextLine().toLowerCase();
+
+            // exit check
+            if (beans.contains("exit")) {
+                System.out.println("Thank you for visiting Chipotle Chatbot. Have a great day!");
+                System.exit(0);//terminates the JVM so entire code stops, not just loop like break does
+            }
+
+            if (addItemsToOrder(beans) || beans.equals("no") || beans.equals("none")||beans.equals("no beans")) {
+                if (beans.equals("no") || beans.equals("none")||beans.equals("no beans")) {
+                    orderSummary += "No Beans, ";
+                }
+                break;
+            }
+            System.out.println(getRandomResponse(misunderstandings));
+        }
+
+        // pick which toppings or none
+        while (true) {
+            System.out.println("Want Guacamole, Mild salsa, Medium salsa, Hot salsa, Corn, Sour Cream, Fajitas, Cheese, Lettuce, Queso, or None?");
+            String toppings = scanner.nextLine().toLowerCase();
+
+            // exit check
+            if (toppings.contains("exit")) {
+                System.out.println("Thank you for visiting Chipotle Chatbot. Have a great day!");
+                System.exit(0);//terminates the JVM so entire code stops, not just loop like break does
+            }
+
+            if (addItemsToOrder(toppings) || toppings.equals("no") || toppings.equals("none")) {
+                if (toppings.equals("no") || toppings.equals("none")) {
+                    orderSummary += "No Toppings, ";
+                }
+                break;
+            }
+            System.out.println(getRandomResponse(misunderstandings));
+        }
+    }
+
+    
+    
+    private static boolean addItemsToOrder(String input) {
+        boolean validInput = false;//need this bc otherwise it says the || opperator doesnt work
+        for (MenuItem menuItem : menuItems) {// for loop that goes thru each thing in the menu
+            if (input.contains(menuItem.getName().toLowerCase())) {// if the item they said is in the menu
+                orderSummary += menuItem.getName() + ", ";// add to the order summary
+                totalPrice += menuItem.getPrice();// also add the price to the total price
+                validInput = true;//
+            }
+        }
+        return validInput;
+    }
+    
 
 
 
-    // Displays the order summary and calculates the final total at checkout.
     private static void checkout() {
         System.out.println("Here’s your order:");
-        System.out.println(orderSummary); // Display all selected items.
-        System.out.println("Your total is $" + totalPrice + ". Chips or a drink for $2 each?");
+        System.out.println(orderSummary);
+        System.out.println("Your total is $" + totalPrice + ". Chips for $2.50 or a drink for $2.00");
         String extra = scanner.nextLine().toLowerCase();
-
-
-
-
-        // Add chips or a drink if selected.
         if (extra.contains("chips")) {
             orderSummary += "Chips, ";
             totalPrice += 2.50;
@@ -192,37 +246,20 @@ public class Main {
             orderSummary += "Fountain Drink, ";
             totalPrice += 2.00;
         }
-
-
-
-
-        // Display the final order and total price.
         System.out.println("Final Order:");
         System.out.println(orderSummary);
         System.out.println("Your final total is $" + totalPrice + ". Thanks for choosing Chipotle!");
     }
 
-
-
-
-    // Returns a random response from the given array.
     private static String getRandomResponse(String[] responses) {
         return responses[(int) (Math.random() * responses.length)];
     }
+
+    private static String getColoredText(String text, String colorCode) {
+        return colorCode + text + "\u001B[0m";
+    }
+
+    private static String capitalizeFirstLetter(String text) {
+        return text.substring(0, 1).toUpperCase() + text.substring(1);
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
