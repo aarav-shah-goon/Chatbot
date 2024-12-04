@@ -66,7 +66,8 @@ public class Main {
     public static void main(String[] args) {
         // say hi and start the convo
         System.out.println(getRandomResponse(greetings));
-        
+        System.out.println("Type 'exit' at any time to leave!");
+
         // loop to keep talking unless they say "exit"
         while (true) {
             // color coded menu 
