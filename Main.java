@@ -2,7 +2,7 @@ import java.util.Scanner;
 
 public class Main {
 
-    // when user doesnt understand
+    // these are the msgs we show when user doesn't get what we're saying
     private static final String[] misunderstandings = {
         "I'm sorry, I didn't catch that.",
         "Could you say that again?",
@@ -10,12 +10,12 @@ public class Main {
         "Can you try asking in a different way?",
         "Hmm, that's beyond my expertise."
     };
-
     // greetings when the bot starts talking
     private static final String[] greetings = {
         "Hello! Welcome to Chipotle! How can I help you today?",
         "Hi there, welcome in! What would you like to order?",
-        "Hey there! Ready to place your order?"
+        "Hey there! Ready to place your order?",
+        "Hey are you guys ready to order?"
     };
 
     // these are the goodbyes when the user ends the convo
@@ -28,7 +28,7 @@ public class Main {
         "Thanks a lot! Enjoy your food, and we will see you next time!"
     };
 
-    // scanner to get input from user
+    // scanner to get input from user, if i dont put this i get an error that scanner type can't be resolved
     private static final Scanner scanner = new Scanner(System.in);
     // total cost of the meal
     private static double totalPrice = 0.0;
@@ -60,14 +60,14 @@ public class Main {
         new MenuItem("Lettuce", 0.00, "Topping"),
         new MenuItem("Queso", 2.10, "Topping"),
         new MenuItem("Chips", 2.50, "Side"),
-        new MenuItem("Fountain Drink", 2.15, "Drink")
+        new MenuItem("Fountain Drink", 2.00, "Drink")
     };
 
     public static void main(String[] args) {
         // say hi and start the convo
         System.out.println(getRandomResponse(greetings));
         System.out.println("Type 'exit' at any time to leave!");
-
+        
         // loop to keep talking unless they say "exit"
         while (true) {
             // color coded menu 
@@ -87,7 +87,7 @@ public class Main {
             if (!isValidDish(mainDish)) {//checks if the dish exists
                 System.out.println(getRandomResponse(misunderstandings));
             } else {
-                System.out.println("You picked " + capitalizeFirstLetter(mainDish) + ". Let's customize it!");
+                System.out.println("Alright, let's customize it!");
                 processMainDish(mainDish);
                 System.out.println("Wanna get another dish or check out?");
                 String choice = scanner.nextLine().toLowerCase();//makes a new scanner to see if they said they want a new dish
@@ -103,6 +103,10 @@ public class Main {
                     break;
                 }
                 if (choice.contains("checkout")) {
+                    checkout();
+                    break;
+                }
+                if (choice.contains("out")) {
                     checkout();
                     break;
                 }
